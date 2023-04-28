@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "gpt-telebot"
+version = "0.1.0"
+description = ""
+authors = ["korpaxdev <korpaxdev@gmail.com>"]
+readme = "README.md"
+packages = [{include = "gpt_telebot"}]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+python-dotenv = "^1.0.0"
+pytelegrambotapi = "^4.11.0"
+aiohttp = "^3.8.4"
+sqlalchemy = "^2.0.11"
+openai = "^0.27.5"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
