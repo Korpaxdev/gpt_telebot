@@ -21,13 +21,14 @@ class OpenAi:
         async with aiohttp.ClientSession(headers=self.__headers) as session:
             try:
                 async with session.post(url, json=data) as response:
-                    if response.status == HTTPStatus.OK:
-                        response_data = await response.json()
-                        content = response_data['choices'][0]['message']['content']
-                        message = OpenAiMessages(role=OpenAiRoles.ASSISTANT, content=content)
-                        return message
-            except (asyncio.TimeoutError, aiohttp.ClientError):
-                return None
+                    response_data = await response.json()
+                    if response.status != HTTPStatus.OK:
+                        return print(response_data.get('error'))
+                    content = response_data['choices'][0]['message']['content']
+                    message = OpenAiMessages(role=OpenAiRoles.ASSISTANT, content=content)
+                    return message
+            except (asyncio.TimeoutError, aiohttp.ClientError, Exception) as error:
+                return print(error)
 
     def __get_chat_completion_url(self):
         return f"{self.BASE_URL}/chat/completions"

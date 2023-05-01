@@ -8,11 +8,10 @@ from telebot.types import Message, User
 from classes.base_dataclasses import BaseMessages, UserStatements, OpenAiRoles, OpenAiMessages
 from classes.open_ai import OpenAi
 from models import Base, Users, UserMessagesHistory
+from utils.constants import NOT_ALLOWED_CONTENT_TYPES, ALLOWED_CONTENT_TYPES, MAX_HISTORY_MESSAGES
 
 
 class TelegramBot:
-    MAX_MESSAGES = 10
-
     def __init__(self, env_config: dict[str, str | None]):
         self._bot = AsyncTeleBot(env_config.get('TELEGRAM_TOKEN'))
         self._engine = create_engine(env_config.get('DB_NAME'))
@@ -68,7 +67,7 @@ class TelegramBot:
                 return
             messages_query = session.query(UserMessagesHistory).order_by('created_at')
             messages_count = messages_query.count()
-            if messages_count >= self.MAX_MESSAGES:
+            if messages_count >= MAX_HISTORY_MESSAGES:
                 first_message = messages_query.first()
                 session.delete(first_message)
             message = UserMessagesHistory(user=user.id, role=messages.role, content=messages.content)
@@ -85,7 +84,7 @@ class TelegramBot:
 
     def start(self):
         self._bot.message_handler(commands=['start'])(self.__start_handler)
-        self._bot.message_handler(content_types=['text'])(self.__message_handler)
-        self._bot.message_handler(content_types=['video', 'document', 'location', 'contact', 'sticker'])(
+        self._bot.message_handler(content_types=ALLOWED_CONTENT_TYPES)(self.__message_handler)
+        self._bot.message_handler(content_types=NOT_ALLOWED_CONTENT_TYPES)(
             self.__other_handlers)
         asyncio.run(self._bot.polling())
